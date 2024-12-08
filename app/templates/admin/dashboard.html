@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="relative min-h-screen bg-white">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-to-b from-indigo-50 to-white opacity-70"></div>
+        <div class="absolute inset-0" style="background-image: radial-gradient(#e0e7ff 1px, transparent 1px); background-size: 24px 24px;"></div>
+    </div>
+
+    <div class="relative py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Stats Grid -->
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                <!-- Total Voters -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center">
+                            <i class="bi bi-people-fill text-xl text-indigo-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-sm font-medium text-gray-500">Total Voters</h3>
+                            <p class="text-2xl font-semibold text-gray-900">{{ total_voters }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Votes -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center">
+                            <i class="bi bi-check2-square text-xl text-indigo-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-sm font-medium text-gray-500">Total Votes Cast</h3>
+                            <p class="text-2xl font-semibold text-gray-900">{{ total_votes }}</p>
+                            <p class="text-sm text-indigo-600">{{ "%.1f"|format(turnout_percentage) }}% Turnout</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Positions -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center">
+                            <i class="bi bi-person-badge text-xl text-indigo-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-sm font-medium text-gray-500">Active Positions</h3>
+                            <p class="text-2xl font-semibold text-gray-900">{{ total_positions }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Candidates -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center">
+                            <i class="bi bi-person-lines-fill text-xl text-indigo-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-sm font-medium text-gray-500">Total Candidates</h3>
+                            <p class="text-2xl font-semibold text-gray-900">{{ total_candidates }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Position Statistics -->
+            <div class="mt-8 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <i class="bi bi-bar-chart-line text-xl text-indigo-600 mr-3"></i>
+                        <h2 class="text-lg font-semibold text-gray-900">Position Statistics</h2>
+                    </div>
+                    <div class="mt-6 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Candidates</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Votes</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Turnout</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for stat in position_stats %}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">{{ stat.position.title }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ stat.candidates }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ stat.votes }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ "%.1f"|format(stat.turnout) }}%</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <a href="{{ url_for('admin.candidates') }}" class="text-indigo-600 hover:text-indigo-900">View Candidates</a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        No positions available
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Votes -->
+            <div class="mt-8 bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <i class="bi bi-clock-history text-xl text-indigo-600 mr-3"></i>
+                        <h2 class="text-lg font-semibold text-gray-900">Recent Votes</h2>
+                    </div>
+                    <div class="mt-6 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Candidate</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for vote in recent_votes %}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ vote.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ vote.position.title }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ vote.candidate.name }}</div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        No votes recorded yet
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <a href="{{ url_for('admin.positions') }}" 
+                   class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300 flex items-center">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
+                        <i class="bi bi-plus-circle text-lg text-indigo-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-base font-medium text-gray-900">Add Position</h3>
+                        <p class="mt-1 text-sm text-gray-500">Create a new position</p>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('admin.candidates') }}"
+                   class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300 flex items-center">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
+                        <i class="bi bi-person-plus text-lg text-indigo-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-base font-medium text-gray-900">Add Candidate</h3>
+                        <p class="mt-1 text-sm text-gray-500">Register a new candidate</p>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('admin.courses') }}"
+                   class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-all duration-300 flex items-center">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
+                        <i class="bi bi-mortarboard text-lg text-indigo-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-base font-medium text-gray-900">Add Course</h3>
+                        <p class="mt-1 text-sm text-gray-500">Add a new course</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

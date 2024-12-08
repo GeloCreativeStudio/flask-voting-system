@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="relative min-h-screen flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-to-b from-indigo-50 to-white opacity-70"></div>
+        <div class="absolute inset-0" style="background-image: radial-gradient(#e0e7ff 1px, transparent 1px); background-size: 24px 24px;"></div>
+    </div>
+
+    <div class="relative w-full max-w-2xl mx-auto">
+        <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl p-8 border border-gray-100 text-center">
+            <!-- Success Icon -->
+            <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-6">
+                <i class="bi bi-check-circle-fill text-4xl text-green-600"></i>
+            </div>
+
+            <!-- Thank You Message -->
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">
+                Thank You for Voting!
+            </h1>
+            <p class="text-gray-600 mb-8">
+                Your vote has been successfully recorded. Thank you for participating in the election.
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{{ url_for('core.results') }}" 
+                   class="inline-flex items-center justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300">
+                    <i class="bi bi-bar-chart me-2"></i>
+                    View Results
+                </a>
+                <a href="{{ url_for('core.index') }}" 
+                   class="inline-flex items-center justify-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300">
+                    <i class="bi bi-house me-2"></i>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

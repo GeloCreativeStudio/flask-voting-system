@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="relative min-h-screen bg-white">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-to-b from-indigo-50 to-white opacity-70"></div>
+        <div class="absolute inset-0" style="background-image: radial-gradient(#e0e7ff 1px, transparent 1px); background-size: 24px 24px;"></div>
+    </div>
+
+    <div class="relative py-8 px-3 sm:py-12 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+            <!-- Stats Cards -->
+            <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                            <i class="bi bi-people text-indigo-500 text-sm sm:text-base"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs sm:text-sm text-gray-600">Total Voters</p>
+                            <p class="text-base sm:text-lg font-semibold text-gray-900">{{ total_voters }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                            <i class="bi bi-check2-circle text-indigo-500 text-sm sm:text-base"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs sm:text-sm text-gray-600">Votes Cast</p>
+                            <p class="text-base sm:text-lg font-semibold text-gray-900">{{ total_votes }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                            <i class="bi bi-percent text-indigo-500 text-sm sm:text-base"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs sm:text-sm text-gray-600">Turnout</p>
+                            <p class="text-base sm:text-lg font-semibold text-gray-900">{{ "%.1f"|format(total_votes/total_voters*100 if total_voters > 0 else 0) }}%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Cards -->
+            <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+                <div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-6">
+                    <i class="bi bi-trophy text-indigo-500 text-base sm:text-lg"></i>
+                    <h2 class="text-lg sm:text-xl font-bold text-gray-900">Election Results</h2>
+                </div>
+
+                <div class="space-y-4 sm:space-y-6">
+                    {% for position, candidates in results.items() %}
+                    <div class="bg-white/90 rounded-lg border border-gray-200 p-3 sm:p-4">
+                        <div class="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4">
+                            <i class="bi bi-award text-indigo-500 text-sm sm:text-base"></i>
+                            <h3 class="text-base sm:text-lg font-bold text-gray-900">{{ position.title }}</h3>
+                        </div>
+                        
+                        <div class="space-y-3 sm:space-y-4">
+                            {% for candidate in candidates %}
+                            {% set max_votes = candidates|map(attribute='votes')|max %}
+                            {% set total_position_votes = candidates|sum(attribute='votes') %}
+                            {% set percentage = (candidate.votes / total_position_votes * 100)|round(1) if total_position_votes > 0 else 0 %}
+                            <div class="group">
+                                <div class="flex justify-between items-center mb-2">
+                                    <div class="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                                            <i class="bi bi-person text-indigo-500 text-xs sm:text-sm"></i>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+                                                <h4 class="text-sm sm:text-base font-semibold text-gray-900 truncate">{{ candidate.candidate.name }}</h4>
+                                                {% if candidate.votes == max_votes and candidate.votes > 0 %}
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                    <i class="bi bi-trophy-fill text-yellow-500 mr-1"></i>
+                                                    Leading
+                                                </span>
+                                                {% endif %}
+                                            </div>
+                                            <button onclick="showPlatform('{{ candidate.candidate.name }}', '{{ candidate.candidate.platform }}')"
+                                                    class="mt-1 text-xs text-indigo-600 hover:text-indigo-800 transition-colors">
+                                                View Platform
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm sm:text-base font-semibold text-gray-900">{{ candidate.votes }}</p>
+                                        <p class="text-xs text-gray-500">{{ percentage }}%</p>
+                                    </div>
+                                </div>
+                                <div class="relative h-2 bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="absolute inset-y-0 left-0 bg-indigo-600 rounded-full transition-all duration-500"
+                                         style="width: {{ percentage }}%"></div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-8">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-3">
+                            <i class="bi bi-clipboard-x text-gray-400"></i>
+                        </div>
+                        <p class="text-gray-500">No results available yet.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if not current_user.has_voted and not current_user.is_admin %}
+            <div class="mt-6 sm:mt-8 text-center">
+                <a href="{{ url_for('core.vote') }}" 
+                   class="inline-flex items-center justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300">
+                    <i class="bi bi-check2-square mr-2"></i>
+                    Cast Your Vote
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Platform Modal -->
+<div id="platformModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onclick="closePlatformModal()"></div>
+        <div class="relative inline-block w-full max-w-lg p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl sm:my-16"
+             id="modalContent">
+            <div class="absolute top-0 right-0 pt-4 pr-4">
+                <button type="button" 
+                        class="text-gray-400 hover:text-gray-500 focus:outline-none"
+                        onclick="closePlatformModal()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="sm:flex sm:items-start">
+                <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900 mb-2" id="modalTitle"></h3>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-500" id="modalPlatform"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showPlatform(name, platform) {
+        const modal = document.getElementById('platformModal');
+        const title = document.getElementById('modalTitle');
+        const platformText = document.getElementById('modalPlatform');
+        
+        title.textContent = name;
+        platformText.textContent = platform;
+        
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        
+        // Add event listener for escape key
+        document.addEventListener('keydown', handleModalKeyboard);
+    }
+    
+    function closePlatformModal() {
+        const modal = document.getElementById('platformModal');
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+        
+        // Remove event listener
+        document.removeEventListener('keydown', handleModalKeyboard);
+    }
+    
+    function handleModalKeyboard(event) {
+        if (event.key === 'Escape') {
+            closePlatformModal();
+        }
+    }
+</script>
+{% endblock %}

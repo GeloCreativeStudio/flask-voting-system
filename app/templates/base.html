@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gradient-to-br from-indigo-50 to-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Government Voting System</title>
+    <!-- Favicons -->
+    <link rel="icon" media="(prefers-color-scheme: light)" href="{{ url_for('static', filename='images/check-square-fill-light.svg') }}">
+    <link rel="icon" media="(prefers-color-scheme: dark)" href="{{ url_for('static', filename='images/check-square-fill-dark.svg') }}">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'quicksand': ['Quicksand', 'sans-serif'],
+                    },
+                    screens: {
+                        'custom': '700px',
+                    },
+                    zIndex: {
+                        '100': '100',
+                    },
+                    keyframes: {
+                        'slide-in': {
+                            '0%': { transform: 'translateX(100%)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' }
+                        },
+                        'slide-out': {
+                            '0%': { transform: 'translateX(0)', opacity: '1' },
+                            '100%': { transform: 'translateX(100%)', opacity: '0' }
+                        },
+                        'bounce-in': {
+                            '0%': { transform: 'scale(0.95)', opacity: '0' },
+                            '70%': { transform: 'scale(1.05)', opacity: '0.8' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        }
+                    },
+                    animation: {
+                        'slide-in': 'slide-in 0.3s ease-out',
+                        'slide-out': 'slide-out 0.3s ease-in',
+                        'bounce-in': 'bounce-in 0.5s ease-out'
+                    }
+                },
+            },
+        }
+    </script>
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    
+    <style>
+        /* Base notification styles */
+        .notification-container {
+            position: fixed;
+            z-index: 100;
+            pointer-events: none;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .notification-item {
+            pointer-events: auto;
+            width: 100%;
+            max-width: 24rem;
+            margin-bottom: 0.75rem;
+            animation: bounce-in 0.5s ease-out;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .notification-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+        }
+
+        .notification-progress-bar {
+            height: 100%;
+            width: 100%;
+            transition: width linear;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: flex-start;
+            padding: 0.75rem 1rem;
+        }
+
+        .notification-icon {
+            flex-shrink: 0;
+            margin-right: 0.75rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-message {
+            flex-grow: 1;
+            margin-right: 0.75rem;
+        }
+
+        .notification-close {
+            flex-shrink: 0;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .notification-item:hover .notification-close {
+            opacity: 1;
+        }
+
+        /* Mobile-first responsive design */
+        @media (min-width: 640px) {
+            .notification-container {
+                align-items: flex-end;
+                padding: 1.5rem;
+            }
+        }
+
+        /* Animation classes */
+        @keyframes notification-in {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes notification-out {
+            0% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+
+        .notification-enter {
+            animation: notification-in 0.3s ease-out;
+        }
+
+        .notification-exit {
+            animation: notification-out 0.3s ease-in forwards;
+        }
+
+        /* Accessibility improvements */
+        @media (prefers-reduced-motion: reduce) {
+            .notification-item,
+            .notification-enter,
+            .notification-exit,
+            .notification-progress-bar {
+                animation: none;
+                transition: none;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="h-full flex flex-col font-quicksand">
+    <!-- Notification Container -->
+    <div class="notification-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="notification-item bg-white rounded-lg shadow-xl border-l-4 {{ 'border-green-500' if category == 'success' else 'border-red-500' if category == 'error' else 'border-blue-500' }}"
+                         role="alert"
+                         aria-live="polite"
+                         data-notification-id="{{ loop.index }}"
+                         data-category="{{ category }}">
+                        <div class="notification-content">
+                            <div class="notification-icon">
+                                {% if category == 'success' %}
+                                    <i class="fas fa-check-circle text-green-500 text-lg"></i>
+                                {% elif category == 'error' %}
+                                    <i class="fas fa-exclamation-circle text-red-500 text-lg"></i>
+                                {% else %}
+                                    <i class="fas fa-info-circle text-blue-500 text-lg"></i>
+                                {% endif %}
+                            </div>
+                            <div class="notification-message">
+                                <p class="text-sm font-medium text-gray-900">
+                                    {{ message }}
+                                </p>
+                            </div>
+                            <button type="button" 
+                                    class="notification-close bg-white rounded-md p-1 inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+                                    aria-label="Close notification">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="notification-progress">
+                            <div class="notification-progress-bar {{ 'bg-green-500' if category == 'success' else 'bg-red-500' if category == 'error' else 'bg-blue-500' }}"></div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white/80 backdrop-blur-sm border-b border-gray-200 fixed w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo and Brand -->
+                <div class="flex flex-1">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="{{ url_for('core.index') }}" class="flex items-center space-x-3 group">
+                            <i class="bi bi-check-square-fill text-2xl text-indigo-600 transition-colors duration-200"></i>
+                            <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 font-quicksand" style="letter-spacing: -0.5px;">
+                                SG Voting
+                            </span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden lg:flex lg:items-center lg:justify-between lg:flex-1">
+                    <div class="flex space-x-8">
+                        {% if current_user.is_authenticated %}
+                            {% if current_user.is_admin %}
+                                <!-- Admin Navigation -->
+                                <a href="{{ url_for('admin.dashboard') }}" 
+                                   class="group inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200
+                                          {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'admin.dashboard' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                                    <i class="{% if request.endpoint == 'admin.dashboard' %}bi-grid-fill{% else %}bi-grid{% endif %} mr-2"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                                <a href="{{ url_for('admin.candidates') }}"
+                                   class="group inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200
+                                          {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'admin.candidates' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                                    <i class="{% if request.endpoint == 'admin.candidates' %}bi-person-badge-fill{% else %}bi-person-badge{% endif %} mr-2 transition-transform group-hover:scale-110"></i>
+                                    <span>Candidates</span>
+                                </a>
+                                <a href="{{ url_for('admin.positions') }}"
+                                   class="group inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200
+                                          {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'admin.positions' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                                    <i class="{% if request.endpoint == 'admin.positions' %}bi-diagram-3-fill{% else %}bi-diagram-3{% endif %} mr-2 transition-transform group-hover:scale-110"></i>
+                                    <span>Positions</span>
+                                </a>
+                                <a href="{{ url_for('admin.courses') }}"
+                                   class="group inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200
+                                          {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'admin.courses' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                                    <i class="{% if request.endpoint == 'admin.courses' %}bi-mortarboard-fill{% else %}bi-mortarboard{% endif %} mr-2 transition-transform group-hover:scale-110"></i>
+                                    <span>Courses</span>
+                                </a>
+                            {% else %}
+                                <!-- Voter Navigation -->
+                                <a href="{{ url_for('core.vote') }}"
+                                   class="group inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200
+                                          {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'core.vote' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                                    <i class="{% if request.endpoint == 'core.vote' %}bi-check2-square-fill{% else %}bi-check2-square{% endif %} mr-2 transition-transform group-hover:scale-110"></i>
+                                    <span>Vote</span>
+                                </a>
+                                <a href="{{ url_for('core.results') }}"
+                                   class="group inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200
+                                          {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'core.results' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                                    <i class="{% if request.endpoint == 'core.results' %}bi-bar-chart-fill{% else %}bi-bar-chart{% endif %} mr-2 transition-transform group-hover:scale-110"></i>
+                                    <span>Results</span>
+                                </a>
+                            {% endif %}
+                        {% else %}
+                            <!-- Unregistered User Navigation -->
+                            <a href="{{ url_for('core.index') }}"
+                               class="group inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200
+                                      {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'core.index' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                                <i class="{% if request.endpoint == 'core.index' %}bi-house-fill{% else %}bi-house{% endif %} mr-2 transition-transform group-hover:scale-110"></i>
+                                <span>Home</span>
+                            </a>
+                            <a href="{{ url_for('auth.login') }}"
+                               class="group inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200
+                                      {% if request.endpoint == 'auth.login' %}text-indigo-600 bg-indigo-50{% else %}text-gray-600 hover:text-indigo-600 hover:bg-gray-50{% endif %}">
+                                <i class="{% if request.endpoint == 'auth.login' %}bi-door-open-fill{% else %}bi-door-open{% endif %} mr-2"></i>
+                                <span>Login</span>
+                            </a>
+                            <a href="{{ url_for('auth.register') }}"
+                               class="group inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-all duration-200
+                                      {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'auth.register' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                                <i class="{% if request.endpoint == 'auth.register' %}bi-person-plus-fill{% else %}bi-person-plus{% endif %} mr-2 transition-transform group-hover:scale-110"></i>
+                                <span>Register</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="flex lg:hidden">
+                    <button type="button" 
+                            onclick="toggleMobileMenu()"
+                            class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition-colors duration-200"
+                            aria-controls="mobile-menu"
+                            aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <i class="bi bi-list text-2xl"></i>
+                    </button>
+                </div>
+
+                <!-- User Menu (Desktop) -->
+                <div class="hidden lg:ml-4 lg:flex lg:items-center">
+                    {% if current_user.is_authenticated %}
+                        <div class="ml-4 relative flex-shrink-0">
+                            <div class="group">
+                                <button type="button" 
+                                        class="bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                        id="user-menu-button"
+                                        aria-expanded="false"
+                                        aria-haspopup="true"
+                                        onclick="toggleUserMenu()">
+                                    <span class="sr-only">Open user menu</span>
+                                    <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                                        {% if current_user.is_admin %}
+                                            <i class="bi bi-shield-lock-fill text-indigo-600"></i>
+                                        {% else %}
+                                            <i class="bi bi-person-fill text-indigo-600"></i>
+                                        {% endif %}
+                                    </div>
+                                </button>
+                            </div>
+
+                            <!-- User dropdown menu -->
+                            <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none transform opacity-0 scale-95 hidden transition-all duration-200 ease-out"
+                                 role="menu"
+                                 aria-orientation="vertical"
+                                 aria-labelledby="user-menu-button"
+                                 tabindex="-1"
+                                 id="user-menu-dropdown">
+                                <div class="px-4 py-2 text-xs">
+                                    {% if current_user.is_admin %}
+                                        <span class="text-gray-500">Signed in as</span><br>
+                                        <span class="font-medium text-gray-900">Administrator</span><br>
+                                        <span class="text-gray-500">System Management</span>
+                                    {% else %}
+                                        <span class="text-gray-500">Signed in as</span><br>
+                                        <span class="font-medium text-gray-900">{{ current_user.student_id }}</span><br>
+                                        <span class="text-gray-500">Student Voter</span>
+                                    {% endif %}
+                                </div>
+                                <div class="border-t border-gray-100"></div>
+                                <a href="{{ url_for('auth.logout') }}"
+                                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                                   role="menuitem"
+                                   tabindex="-1">
+                                    <i class="bi bi-box-arrow-right mr-2"></i>
+                                    Sign out
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div class="lg:hidden" id="mobile-menu" style="display: none;">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.is_admin %}
+                        <!-- Admin Mobile Navigation -->
+                        <a href="{{ url_for('admin.dashboard') }}"
+                           class="group flex items-center px-3 py-2 text-base font-medium rounded-md transition-all duration-200
+                                  {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'admin.dashboard' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                            <i class="{% if request.endpoint == 'admin.dashboard' %}bi-grid-fill{% else %}bi-grid{% endif %} mr-3"></i>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="{{ url_for('admin.candidates') }}"
+                           class="group flex items-center px-3 py-2 text-base font-medium rounded-md transition-all duration-200
+                                  {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'admin.candidates' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                            <i class="{% if request.endpoint == 'admin.candidates' %}bi-person-badge-fill{% else %}bi-person-badge{% endif %} mr-3 transition-transform group-hover:scale-110"></i>
+                            <span>Candidates</span>
+                        </a>
+                        <a href="{{ url_for('admin.positions') }}"
+                           class="group flex items-center px-3 py-2 text-base font-medium rounded-md transition-all duration-200
+                                  {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'admin.positions' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                            <i class="{% if request.endpoint == 'admin.positions' %}bi-diagram-3-fill{% else %}bi-diagram-3{% endif %} mr-3 transition-transform group-hover:scale-110"></i>
+                            <span>Positions</span>
+                        </a>
+                        <a href="{{ url_for('admin.courses') }}"
+                           class="group flex items-center px-3 py-2 text-base font-medium rounded-md transition-all duration-200
+                                  {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'admin.courses' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                            <i class="{% if request.endpoint == 'admin.courses' %}bi-mortarboard-fill{% else %}bi-mortarboard{% endif %} mr-3 transition-transform group-hover:scale-110"></i>
+                            <span>Courses</span>
+                        </a>
+                    {% else %}
+                        <!-- Voter Mobile Navigation -->
+                        <a href="{{ url_for('core.vote') }}"
+                           class="group flex items-center px-3 py-2 text-base font-medium rounded-md transition-all duration-200
+                                  {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'core.vote' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                            <i class="{% if request.endpoint == 'core.vote' %}bi-check2-square-fill{% else %}bi-check2-square{% endif %} mr-3 transition-transform group-hover:scale-110"></i>
+                            <span>Vote</span>
+                        </a>
+                        <a href="{{ url_for('core.results') }}"
+                           class="group flex items-center px-3 py-2 text-base font-medium rounded-md transition-all duration-200
+                                  {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'core.results' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                            <i class="{% if request.endpoint == 'core.results' %}bi-bar-chart-fill{% else %}bi-bar-chart{% endif %} mr-3 transition-transform group-hover:scale-110"></i>
+                            <span>Results</span>
+                        </a>
+                    {% endif %}
+
+                    <!-- Mobile User Menu -->
+                    <div class="border-t border-gray-200 pt-4">
+                        <div class="px-3">
+                            {% if current_user.is_admin %}
+                                <span class="text-xs text-gray-500">Signed in as</span><br>
+                                <span class="text-sm font-medium text-gray-900">Administrator</span><br>
+                                <span class="text-xs text-gray-500">System Management</span>
+                            {% else %}
+                                <span class="text-xs text-gray-500">Signed in as</span><br>
+                                <span class="text-sm font-medium text-gray-900">{{ current_user.student_id }}</span><br>
+                                <span class="text-xs text-gray-500">Student Voter</span>
+                            {% endif %}
+                        </div>
+                        <div class="mt-3">
+                            <a href="{{ url_for('auth.logout') }}"
+                               class="group flex items-center px-3 py-2 text-base font-medium rounded-md text-gray-600 hover:text-indigo-600 hover:bg-gray-50 transition-colors duration-200">
+                                <i class="bi bi-box-arrow-right mr-3"></i>
+                                <span>Sign out</span>
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Unregistered User Mobile Navigation -->
+                    <a href="{{ url_for('core.index') }}"
+                       class="group flex items-center px-3 py-2 text-base font-medium rounded-md transition-all duration-200
+                              {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'core.index' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                        <i class="{% if request.endpoint == 'core.index' %}bi-house-fill{% else %}bi-house{% endif %} mr-3 transition-transform group-hover:scale-110"></i>
+                        <span>Home</span>
+                    </a>
+                    <a href="{{ url_for('auth.login') }}"
+                       class="group flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors duration-200
+                              {% if request.endpoint == 'auth.login' %}text-indigo-600 bg-indigo-50{% else %}text-gray-600 hover:text-indigo-600 hover:bg-gray-50{% endif %}">
+                        <i class="{% if request.endpoint == 'auth.login' %}bi-door-open-fill{% else %}bi-door-open{% endif %} mr-3"></i>
+                        <span>Login</span>
+                    </a>
+                    <a href="{{ url_for('auth.register') }}"
+                       class="group flex items-center px-3 py-2 text-base font-medium rounded-md transition-all duration-200
+                              {{ 'text-indigo-600 bg-indigo-50' if request.endpoint == 'auth.register' else 'text-gray-600 hover:text-indigo-600 hover:bg-gray-50' }}">
+                        <i class="{% if request.endpoint == 'auth.register' %}bi-person-plus-fill{% else %}bi-person-plus{% endif %} mr-3 transition-transform group-hover:scale-110"></i>
+                        <span>Register</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow pt-16">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-sm text-gray-500">
+                <p>&copy; {{ current_year }} Student Government Voting System. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <!-- Add JavaScript for mobile menu toggle -->
+    <script>
+        // Notification System
+        document.addEventListener('DOMContentLoaded', function() {
+            const notifications = document.querySelectorAll('.notification-item');
+            const NOTIFICATION_DURATION = 5000; // 5 seconds
+
+            notifications.forEach(notification => {
+                const progressBar = notification.querySelector('.notification-progress-bar');
+                const closeButton = notification.querySelector('.notification-close');
+                
+                // Start progress bar animation
+                progressBar.style.transition = `width ${NOTIFICATION_DURATION}ms linear`;
+                setTimeout(() => {
+                    progressBar.style.width = '0%';
+                }, 100);
+
+                // Auto dismiss after duration
+                const dismissTimeout = setTimeout(() => {
+                    dismissNotification(notification);
+                }, NOTIFICATION_DURATION);
+
+                // Handle close button click
+                closeButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    clearTimeout(dismissTimeout);
+                    dismissNotification(notification);
+                });
+
+                // Handle notification click
+                notification.addEventListener('click', () => {
+                    clearTimeout(dismissTimeout);
+                    dismissNotification(notification);
+                });
+
+                // Pause progress on hover
+                notification.addEventListener('mouseenter', () => {
+                    clearTimeout(dismissTimeout);
+                    progressBar.style.transition = 'none';
+                });
+
+                // Resume progress on mouse leave
+                notification.addEventListener('mouseleave', () => {
+                    const remainingWidth = progressBar.offsetWidth;
+                    const totalWidth = notification.offsetWidth;
+                    const remainingTime = (remainingWidth / totalWidth) * NOTIFICATION_DURATION;
+                    
+                    progressBar.style.transition = `width ${remainingTime}ms linear`;
+                    progressBar.style.width = '0%';
+                    
+                    const newTimeout = setTimeout(() => {
+                        dismissNotification(notification);
+                    }, remainingTime);
+                });
+            });
+
+            function dismissNotification(notification) {
+                notification.classList.add('notification-exit');
+                notification.addEventListener('animationend', () => {
+                    notification.remove();
+                });
+            }
+        });
+
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu.style.display === 'none') {
+                mobileMenu.style.display = 'block';
+            } else {
+                mobileMenu.style.display = 'none';
+            }
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('user-menu-dropdown');
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('opacity-0');
+            menu.classList.toggle('opacity-100');
+        }
+
+        // Close menus when clicking outside
+        document.addEventListener('click', function(event) {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuButton = document.querySelector('[onclick="toggleMobileMenu()"]');
+            const userMenu = document.getElementById('user-menu-dropdown');
+            const userMenuButton = document.getElementById('user-menu-button');
+
+            // Handle mobile menu
+            if (mobileMenu && mobileMenuButton) {
+                if (!mobileMenuButton.contains(event.target) && !mobileMenu.contains(event.target)) {
+                    if (mobileMenu.style.display !== 'none') {
+                        toggleMobileMenu();
+                    }
+                }
+            }
+
+            // Handle user menu
+            if (userMenu && userMenuButton) {
+                if (!userMenuButton.contains(event.target) && !userMenu.contains(event.target)) {
+                    if (!userMenu.classList.contains('hidden')) {
+                        toggleUserMenu();
+                    }
+                }
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

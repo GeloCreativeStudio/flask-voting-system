@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="relative min-h-screen bg-white">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-to-b from-indigo-50 to-white opacity-70"></div>
+        <div class="absolute inset-0" style="background-image: radial-gradient(#e0e7ff 1px, transparent 1px); background-size: 24px 24px;"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="relative overflow-hidden">
+        <div class="relative pt-10 pb-20 sm:pt-16 sm:pb-32">
+            <div class="mt-16 mx-auto max-w-7xl px-4 sm:mt-24 sm:px-6">
+                <div class="text-center">
+                    <h1 class="text-5xl tracking-tight font-extrabold text-gray-900 sm:text-6xl md:text-7xl">
+                        <span class="block bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500">Student Government</span>
+                        <span class="block mt-2 text-gray-900">Voting System</span>
+                    </h1>
+                    <p class="mt-6 max-w-md mx-auto text-lg text-gray-600 sm:text-xl md:mt-8 md:max-w-3xl">
+                        Welcome to the official Student Government Voting System. Make your voice heard in shaping our future together!
+                    </p>
+                    <div class="mt-8 flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                        {% if current_user.is_authenticated %}
+                            {% if current_user.is_admin %}
+                            <a href="{{ url_for('admin.dashboard') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg">
+                                <i class="bi bi-gear-fill mr-2"></i>
+                                Access Admin Dashboard
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('core.vote') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg">
+                                <i class="bi bi-check2-square mr-2"></i>
+                                Cast Your Vote
+                            </a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('auth.login') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg">
+                                <i class="bi bi-box-arrow-in-right mr-2"></i>
+                                Login to Vote
+                            </a>
+                            <a href="{{ url_for('auth.register') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-lg text-indigo-600 bg-white border-2 border-indigo-600 hover:bg-indigo-50 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg">
+                                <i class="bi bi-person-plus mr-2"></i>
+                                Register as Voter
+                            </a>
+                        {% endif %}
+                    </div>
+                    {% if not current_user.is_authenticated %}
+                    <div class="mt-4 text-center">
+                        <a href="{{ url_for('admin.login') }}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors duration-200">
+                            <i class="fas fa-user-shield mr-2"></i>
+                            Administrator Access
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="relative py-16 sm:py-24 lg:py-32">
+        <div class="mx-auto max-w-md px-4 text-center sm:max-w-3xl sm:px-6 lg:max-w-7xl lg:px-8">
+            <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                Why Choose Our Platform?
+            </h2>
+            <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-600">
+                A modern and secure voting system designed for student leaders of tomorrow
+            </p>
+            <div class="mt-16">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Feature 1: Secure Platform -->
+                    <div class="relative group">
+                        <div class="h-full relative p-6 bg-white rounded-3xl shadow-sm hover:shadow-md border border-gray-100 transition-all duration-300">
+                            <div class="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 rounded-3xl transition-all duration-300"></div>
+                            <div class="relative flex flex-col h-full">
+                                <div class="flex items-center mb-4">
+                                    <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mr-3">
+                                        <i class="bi bi-lock-fill text-blue-500 text-lg"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-900 whitespace-nowrap">Secure Platform</h3>
+                                </div>
+                                <p class="text-gray-600 text-sm leading-relaxed">
+                                    End-to-end encryption ensures your vote remains confidential and tamper-proof.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2: Real-time Results -->
+                    <div class="relative group">
+                        <div class="h-full relative p-6 bg-white rounded-3xl shadow-sm hover:shadow-md border border-gray-100 transition-all duration-300">
+                            <div class="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 rounded-3xl transition-all duration-300"></div>
+                            <div class="relative flex flex-col h-full">
+                                <div class="flex items-center mb-4">
+                                    <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mr-3">
+                                        <i class="bi bi-graph-up text-blue-500 text-lg"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-900 whitespace-nowrap">Real-time Results</h3>
+                                </div>
+                                <p class="text-gray-600 text-sm leading-relaxed">
+                                    Watch the election unfold with instant updates and transparent vote counting.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3: Easy Verification -->
+                    <div class="relative group">
+                        <div class="h-full relative p-6 bg-white rounded-3xl shadow-sm hover:shadow-md border border-gray-100 transition-all duration-300">
+                            <div class="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 rounded-3xl transition-all duration-300"></div>
+                            <div class="relative flex flex-col h-full">
+                                <div class="flex items-center mb-4">
+                                    <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mr-3">
+                                        <i class="bi bi-person-check text-blue-500 text-lg"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-900 whitespace-nowrap">Easy Verification</h3>
+                                </div>
+                                <p class="text-gray-600 text-sm leading-relaxed">
+                                    Simple and quick verification process ensures only eligible students can participate.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 4: Mobile Friendly -->
+                    <div class="relative group">
+                        <div class="h-full relative p-6 bg-white rounded-3xl shadow-sm hover:shadow-md border border-gray-100 transition-all duration-300">
+                            <div class="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 rounded-3xl transition-all duration-300"></div>
+                            <div class="relative flex flex-col h-full">
+                                <div class="flex items-center mb-4">
+                                    <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mr-3">
+                                        <i class="bi bi-phone-fill text-blue-500 text-lg"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-900 whitespace-nowrap">Mobile Friendly</h3>
+                                </div>
+                                <p class="text-gray-600 text-sm leading-relaxed">
+                                    Vote from anywhere using your smartphone or tablet with our responsive design.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action Section -->
+    <div class="relative">
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600 opacity-90"></div>
+        <div class="absolute inset-0" style="background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 24px 24px;"></div>
+        <div class="relative max-w-7xl mx-auto px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+            <div class="text-center">
+                <span class="text-sm font-semibold text-indigo-200 tracking-wide uppercase">Democracy in Action</span>
+                <h2 class="mt-2 text-4xl font-extrabold text-white sm:text-5xl lg:text-6xl">
+                    Shape Tomorrow's Leadership
+                </h2>
+                <div class="mt-6 max-w-3xl mx-auto">
+                    <p class="text-xl text-indigo-100 leading-relaxed">
+                        Your participation in student government elections is more than just a vote—it's your commitment to building a stronger, more inclusive campus community. Together, we can make meaningful change happen.
+                    </p>
+                </div>
+                <div class="mt-8 flex justify-center">
+                    <div class="inline-flex items-center space-x-2 text-indigo-200">
+                        <span class="text-sm">Secure • Transparent • Accessible</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

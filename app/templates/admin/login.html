@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="relative min-h-screen flex items-center justify-center">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-to-b from-slate-50 to-white opacity-70"></div>
+        <div class="absolute inset-0" style="background-image: radial-gradient(#e2e8f0 1px, transparent 1px); background-size: 24px 24px;"></div>
+    </div>
+
+    <div class="relative max-w-md w-full mx-4">
+        <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl p-8 space-y-6 border border-gray-100">
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-50 mb-4">
+                    <i class="fas fa-user-shield text-3xl text-slate-600"></i>
+                </div>
+                <h2 class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-slate-600 to-slate-800">
+                    Administrator Access
+                </h2>
+                <p class="mt-3 text-sm text-gray-600">
+                    Sign in to manage the voting system
+                </p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="rounded-lg bg-{{ 'green' if category == 'success' else 'red' }}-50 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    {% if category == 'success' %}
+                                        <i class="fas fa-check-circle text-green-400"></i>
+                                    {% else %}
+                                        <i class="fas fa-exclamation-circle text-red-400"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-{{ 'green' if category == 'success' else 'red' }}-800">
+                                        {{ message }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form class="space-y-6" method="POST">
+                {{ form.csrf_token }}
+                <div class="space-y-4">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                        <div class="mt-1 relative rounded-lg shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-user text-gray-400"></i>
+                            </div>
+                            {{ form.username(class="block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-slate-500 focus:border-slate-500 sm:text-sm", placeholder="Enter admin username") }}
+                        </div>
+                    </div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                        <div class="mt-1 relative rounded-lg shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                            {{ form.password(class="block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-slate-500 focus:border-slate-500 sm:text-sm", placeholder="Enter admin password") }}
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    {{ form.submit(class="w-full flex justify-center items-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg") }}
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('core.index') }}" class="inline-flex items-center text-sm font-medium text-slate-600 hover:text-slate-500 transition-colors duration-200">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Return to Homepage
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

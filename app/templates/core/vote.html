@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="relative min-h-screen flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 z-0">
+        <div class="absolute inset-0 bg-gradient-to-b from-indigo-50 to-white opacity-70"></div>
+        <div class="absolute inset-0" style="background-image: radial-gradient(#e0e7ff 1px, transparent 1px); background-size: 24px 24px;"></div>
+    </div>
+
+    <div class="relative w-full max-w-5xl mx-auto">
+        <div class="bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl p-4 sm:p-6 border border-gray-100">
+            <!-- Header Section -->
+            <div class="text-center max-w-2xl mx-auto mb-6">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-50 mb-4">
+                    <i class="bi bi-check2-square text-2xl text-indigo-600"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-600 mb-2">
+                    Cast Your Vote
+                </h2>
+                <p class="text-sm text-gray-600">
+                    Select your preferred candidates for each position
+                </p>
+            </div>
+
+            <!-- Voting Form -->
+            <form id="voteForm" class="space-y-4 max-w-4xl mx-auto">
+                {% for position in positions %}
+                <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 p-6 transform transition-all duration-300 hover:shadow-md">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <i class="bi bi-award text-indigo-500"></i>
+                        <h3 class="text-lg font-bold text-gray-900">{{ position.title }}</h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% if candidates[position.id] %}
+                            {% for candidate in candidates[position.id] %}
+                            <label class="relative flex items-start p-4 rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-500 transition-all duration-300 group">
+                                <div class="absolute top-4 right-4">
+                                    <input type="radio" name="{{ position.id }}" value="{{ candidate.id }}" required
+                                        class="appearance-none w-4 h-4 rounded-full border-2 border-gray-300 checked:border-indigo-600 checked:bg-indigo-600 checked:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200">
+                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 checked:opacity-100">
+                                        <i class="bi bi-check text-white text-xs"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                                        <i class="bi bi-person text-indigo-500 text-sm"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h4 class="text-base font-semibold text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
+                                            {{ candidate.name }}
+                                        </h4>
+                                        <p class="text-sm text-gray-600 line-clamp-2 mt-1">{{ candidate.platform }}</p>
+                                    </div>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        {% else %}
+                            <div class="col-span-full">
+                                <div class="flex items-center justify-center h-24 rounded-lg border border-dashed border-gray-300 bg-gray-50/80">
+                                    <div class="text-center">
+                                        <i class="bi bi-person-slash text-gray-400 text-xl mb-2"></i>
+                                        <p class="text-sm text-gray-500">No candidates available for this position.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-8">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-3">
+                        <i class="bi bi-clipboard-x text-gray-400"></i>
+                    </div>
+                    <p class="text-gray-500">No positions available for voting.</p>
+                </div>
+                {% endfor %}
+
+                <!-- Submit Button -->
+                <div class="mt-6">
+                    <button type="submit" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg">
+                        <i class="bi bi-check2-circle mr-2"></i>
+                        Submit Vote
+                    </button>
+                </div>
+            </form>
+
+            <script>
+                document.getElementById('voteForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData(this);
+                    const votes = {};
+                    
+                    for (let [key, value] of formData.entries()) {
+                        votes[key] = parseInt(value);
+                    }
+                    
+                    fetch('{{ url_for("core.cast_vote") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(votes)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            window.location.href = '{{ url_for("core.thank_you") }}';
+                        } else {
+                            alert(data.message || 'An error occurred while casting your vote.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while casting your vote.');
+                    });
+                });
+            </script>
+        </div>
+    </div>
+</div>
+
+<!-- Add custom styles for radio button animation -->
+<style>
+    input[type="radio"]:checked + div i {
+        opacity: 1;
+    }
+</style>
+{% endblock %}
