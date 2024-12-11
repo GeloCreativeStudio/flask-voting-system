@@ -14,6 +14,7 @@ A secure and user-friendly web-based voting system built with Flask, specificall
 - **Administrative Control** - Comprehensive dashboard for faculty to manage elections and monitor voting
 - **Student-Friendly Interface** - Modern, responsive design that works on all devices
 - **Fair Election Process** - Ensures one vote per student with verification systems
+- **Automated Database Setup** - Includes database verification and initial setup for courses and roles
 
 ## Quick Start
 
@@ -84,17 +85,14 @@ ADMIN_PASSWORD=your-secure-password
 ADMIN_EMAIL=admin@example.com
 ```
 
-6. **Initialize database**
+6. **Initialize and verify database**
 
 First time setup:
 ```bash
 flask db init
-```
-```bash
 flask db migrate -m "Initial migration"
-```
-```bash
 flask db upgrade
+python check_db.py  # Verify and initialize required database entries
 ```
 
 7. **Run the application**
@@ -108,7 +106,7 @@ Once running, open [http://localhost:5000](http://localhost:5000) in your browse
 
 - **Error: No module named 'flask_login'** - Run `pip install flask-login flask-migrate` to install missing dependencies
 - **Error: No such command 'db'** - Make sure you've installed `flask-migrate` and activated your virtual environment
-- **Database errors** - Check if your `DATABASE_URL` is correct and the specified directory exists
+- **Database errors** - Check if your `DATABASE_URL` is correct and run `python check_db.py` to verify database setup
 - **Import errors** - Ensure all dependencies are installed with `pip install -r requirements.txt`
 - **Environment errors** - Make sure `.env` file exists and contains all required settings
 
