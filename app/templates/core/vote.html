@@ -31,7 +31,13 @@
                         <div class="flex items-center space-x-3 mb-4">
                             <i class="bi bi-award text-indigo-500"></i>
                             <h3 class="text-lg font-bold text-gray-900">{{ position.title }}</h3>
-                            <span class="text-sm text-gray-500">(Select up to {{ position.max_winners }} candidate{% if position.max_winners > 1 %}s{% endif %})</span>
+                            <span class="text-sm text-gray-500">
+                                {% if position.max_winners > 1 %}
+                                    (Select exactly {{ position.max_winners }} candidates)
+                                {% else %}
+                                    (Select 1 candidate)
+                                {% endif %}
+                            </span>
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -113,13 +119,12 @@
                     const maxWinners{{ position.id }} = {{ position.max_winners }};
                     const votes{{ position.id }} = votes['{{ position.id }}'] || [];
                     
-                    if (votes{{ position.id }}.length === 0) {
-                        alert('Please select at least one candidate for {{ position.title }}');
-                        return;
-                    }
-                    
-                    if (votes{{ position.id }}.length > maxWinners{{ position.id }}) {
-                        alert('You can only select up to ' + maxWinners{{ position.id }} + ' candidate(s) for {{ position.title }}');
+                    if (votes{{ position.id }}.length !== maxWinners{{ position.id }}) {
+                        {% if position.max_winners > 1 %}
+                            alert('Please select exactly ' + maxWinners{{ position.id }} + ' candidates for {{ position.title }}');
+                        {% else %}
+                            alert('Please select 1 candidate for {{ position.title }}');
+                        {% endif %}
                         return;
                     }
                     {% endfor %}
@@ -144,6 +149,29 @@
                         alert('An error occurred while casting your vote.');
                     });
                 });
+
+                // Add event listeners to enforce max selection
+                {% for position in positions %}
+                {% if position.max_winners > 1 %}
+                const checkboxes{{ position.id }} = document.querySelectorAll('input[name="{{ position.id }}"]');
+                let checkedCount{{ position.id }} = 0;
+
+                checkboxes{{ position.id }}.forEach(checkbox => {
+                    checkbox.addEventListener('change', function() {
+                        if (this.checked) {
+                            checkedCount{{ position.id }}++;
+                            if (checkedCount{{ position.id }} > {{ position.max_winners }}) {
+                                this.checked = false;
+                                checkedCount{{ position.id }}--;
+                                alert('You can only select {{ position.max_winners }} candidates for {{ position.title }}');
+                            }
+                        } else {
+                            checkedCount{{ position.id }}--;
+                        }
+                    });
+                });
+                {% endif %}
+                {% endfor %}
             </script>
         </div>
     </div>
