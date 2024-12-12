@@ -45,20 +45,25 @@ def cast_vote():
         positions = Position.query.all()
         position_ids = {str(p.id): p for p in positions}
         
-        for position_id, candidate_id in votes.items():
+        for position_id, candidate_ids in votes.items():
             if position_id not in position_ids:
                 return jsonify({'status': 'error', 'message': 'Invalid position'}), 400
-                
-            candidate = Candidate.query.get(candidate_id)
-            if not candidate or str(candidate.position_id) != position_id:
-                return jsonify({'status': 'error', 'message': 'Invalid candidate'}), 400
             
-            vote = Vote(
-                voter_id=current_user.id,
-                candidate_id=candidate_id,
-                position_id=position_ids[position_id].id
-            )
-            db.session.add(vote)
+            position = position_ids[position_id]
+            if len(candidate_ids) > position.max_winners:
+                return jsonify({'status': 'error', 'message': f'Too many candidates selected for {position.title}'}), 400
+            
+            for candidate_id in candidate_ids:
+                candidate = Candidate.query.get(candidate_id)
+                if not candidate or str(candidate.position_id) != position_id:
+                    return jsonify({'status': 'error', 'message': 'Invalid candidate'}), 400
+                
+                vote = Vote(
+                    voter_id=current_user.id,
+                    candidate_id=candidate_id,
+                    position_id=position_ids[position_id].id
+                )
+                db.session.add(vote)
         
         # Mark voter as having voted
         current_user.has_voted = True

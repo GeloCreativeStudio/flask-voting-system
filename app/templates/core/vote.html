@@ -25,66 +25,72 @@
 
             <!-- Voting Form -->
             <form id="voteForm" class="space-y-4 max-w-4xl mx-auto">
-                {% for position in positions %}
-                <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 p-6 transform transition-all duration-300 hover:shadow-md">
-                    <div class="flex items-center space-x-3 mb-4">
-                        <i class="bi bi-award text-indigo-500"></i>
-                        <h3 class="text-lg font-bold text-gray-900">{{ position.title }}</h3>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {% if candidates[position.id] %}
-                            {% for candidate in candidates[position.id] %}
-                            <label class="relative flex items-start p-4 rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-500 transition-all duration-300 group">
-                                <div class="absolute top-4 right-4">
-                                    <input type="radio" name="{{ position.id }}" value="{{ candidate.id }}" required
-                                        class="appearance-none w-4 h-4 rounded-full border-2 border-gray-300 checked:border-indigo-600 checked:bg-indigo-600 checked:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200">
-                                    <div class="absolute inset-0 flex items-center justify-center opacity-0 checked:opacity-100">
-                                        <i class="bi bi-check text-white text-xs"></i>
+                {% if positions %}
+                    {% for position in positions %}
+                    <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100 p-6 transform transition-all duration-300 hover:shadow-md">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <i class="bi bi-award text-indigo-500"></i>
+                            <h3 class="text-lg font-bold text-gray-900">{{ position.title }}</h3>
+                            <span class="text-sm text-gray-500">(Select up to {{ position.max_winners }} candidate{% if position.max_winners > 1 %}s{% endif %})</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {% if candidates[position.id] %}
+                                {% for candidate in candidates[position.id] %}
+                                <label class="relative flex items-start p-4 rounded-lg border border-gray-200 cursor-pointer hover:border-indigo-500 transition-all duration-300 group">
+                                    <div class="absolute top-4 right-4">
+                                        <input type="{% if position.max_winners > 1 %}checkbox{% else %}radio{% endif %}" 
+                                               name="{{ position.id }}" 
+                                               value="{{ candidate.id }}" 
+                                               required 
+                                               class="appearance-none w-4 h-4 {% if position.max_winners > 1 %}rounded{% else %}rounded-full{% endif %} border-2 border-gray-300 checked:border-indigo-600 checked:bg-indigo-600 checked:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200">
+                                        <div class="absolute inset-0 flex items-center justify-center opacity-0 checked:opacity-100">
+                                            <i class="bi bi-check text-white text-xs"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                                            <i class="bi bi-person text-indigo-500 text-sm"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h4 class="text-base font-semibold text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
+                                                {{ candidate.name }}
+                                            </h4>
+                                            <p class="text-sm text-gray-600 line-clamp-2 mt-1">{{ candidate.platform }}</p>
+                                        </div>
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            {% else %}
+                                <div class="col-span-full">
+                                    <div class="flex items-center justify-center h-24 rounded-lg border border-dashed border-gray-300 bg-gray-50/80">
+                                        <div class="text-center">
+                                            <i class="bi bi-person-slash text-gray-400 text-xl mb-2"></i>
+                                            <p class="text-sm text-gray-500">No candidates available for this position.</p>
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0">
-                                        <i class="bi bi-person text-indigo-500 text-sm"></i>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <h4 class="text-base font-semibold text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
-                                            {{ candidate.name }}
-                                        </h4>
-                                        <p class="text-sm text-gray-600 line-clamp-2 mt-1">{{ candidate.platform }}</p>
-                                    </div>
-                                </div>
-                            </label>
-                            {% endfor %}
-                        {% else %}
-                            <div class="col-span-full">
-                                <div class="flex items-center justify-center h-24 rounded-lg border border-dashed border-gray-300 bg-gray-50/80">
-                                    <div class="text-center">
-                                        <i class="bi bi-person-slash text-gray-400 text-xl mb-2"></i>
-                                        <p class="text-sm text-gray-500">No candidates available for this position.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endif %}
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
-                {% else %}
-                <div class="text-center py-8">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-3">
-                        <i class="bi bi-clipboard-x text-gray-400"></i>
-                    </div>
-                    <p class="text-gray-500">No positions available for voting.</p>
-                </div>
-                {% endfor %}
+                    {% endfor %}
 
-                <!-- Submit Button -->
-                <div class="mt-6">
-                    <button type="submit" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg">
-                        <i class="bi bi-check2-circle mr-2"></i>
-                        Submit Vote
-                    </button>
-                </div>
+                    <!-- Submit Button -->
+                    <div class="mt-6">
+                        <button type="submit" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg">
+                            <i class="bi bi-check2-circle mr-2"></i>
+                            Submit Vote
+                        </button>
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-3">
+                            <i class="bi bi-clipboard-x text-gray-400"></i>
+                        </div>
+                        <p class="text-gray-500">No positions available for voting.</p>
+                    </div>
+                {% endif %}
             </form>
 
             <script>
@@ -94,9 +100,22 @@
                     const formData = new FormData(this);
                     const votes = {};
                     
+                    // Group votes by position
                     for (let [key, value] of formData.entries()) {
-                        votes[key] = parseInt(value);
+                        if (!votes[key]) {
+                            votes[key] = [];
+                        }
+                        votes[key].push(parseInt(value));
                     }
+
+                    // Validate max winners
+                    {% for position in positions %}
+                    const maxWinners{{ position.id }} = {{ position.max_winners }};
+                    if (votes['{{ position.id }}'] && votes['{{ position.id }}'].length > maxWinners{{ position.id }}) {
+                        alert('You can only select up to ' + maxWinners{{ position.id }} + ' candidate(s) for {{ position.title }}');
+                        return;
+                    }
+                    {% endfor %}
                     
                     fetch('{{ url_for("core.cast_vote") }}', {
                         method: 'POST',
@@ -125,7 +144,8 @@
 
 <!-- Add custom styles for radio button animation -->
 <style>
-    input[type="radio"]:checked + div i {
+    input[type="radio"]:checked + div i,
+    input[type="checkbox"]:checked + div i {
         opacity: 1;
     }
 </style>
